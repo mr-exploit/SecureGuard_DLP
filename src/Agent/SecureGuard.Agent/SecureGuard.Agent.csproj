@@ -8,11 +8,12 @@
     <AssemblyName>SecureGuard.Agent</AssemblyName>
     <UserSecretsId>secureguard-agent-secrets</UserSecretsId>
     <WindowsPackageType>None</WindowsPackageType>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
-    <PackageReference Include="Titanium.Web.Proxy" Version="3.3.2" />
+    <PackageReference Include="Titanium.Web.Proxy" Version="3.2.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
   </ItemGroup>

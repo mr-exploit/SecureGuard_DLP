@@ -3,14 +3,14 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace SecureGuard.Agent.Proxy;
 
-public class CertificateManager
+public class SslCertManager
 {
-    private readonly ILogger<CertificateManager> _logger;
+    private readonly ILogger<SslCertManager> _logger;
     private X509Certificate2? _rootCa;
     private readonly Dictionary<string, X509Certificate2> _certCache = new();
     private readonly object _lock = new();
 
-    public CertificateManager(ILogger<CertificateManager> logger)
+    public SslCertManager(ILogger<SslCertManager> logger)
     {
         _logger = logger;
     }

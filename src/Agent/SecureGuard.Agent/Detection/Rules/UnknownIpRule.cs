@@ -26,7 +26,7 @@ public class UnknownIpRule : IDetectionRule
 
         if (IPAddress.TryParse(ip, out var parsedIp))
         {
-            if (parsedIp.IsLoopback() || _whitelistedIps.Contains(ip))
+            if (IPAddress.IsLoopback(parsedIp) || _whitelistedIps.Contains(ip))
                 return new DetectionResult { IsBlocked = false };
         }
         else
@@ -34,7 +34,7 @@ public class UnknownIpRule : IDetectionRule
             try
             {
                 var addresses = await Dns.GetHostAddressesAsync(ip);
-                if (addresses.Any(a => a.IsLoopback() || _whitelistedIps.Contains(a.ToString())))
+                if (addresses.Any(a => IPAddress.IsLoopback(a) || _whitelistedIps.Contains(a.ToString())))
                     return new DetectionResult { IsBlocked = false };
             }
             catch

@@ -1,3 +1,4 @@
+using SecureGuard.Agent;
 using SecureGuard.Agent.Alert;
 using SecureGuard.Agent.Detection;
 using SecureGuard.Agent.FileMonitor;
@@ -13,7 +14,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.Configure<AgentOptions>(context.Configuration.GetSection("Agent"));
-        services.AddSingleton<CertificateManager>();
+        services.AddSingleton<SslCertManager>();
         services.AddSingleton<RemoteLogService>();
         services.AddSingleton<AlertService>();
         services.AddSingleton<DetectionEngine>();

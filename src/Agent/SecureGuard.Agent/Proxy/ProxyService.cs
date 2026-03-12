@@ -12,7 +12,7 @@ public class ProxyService
 {
     private readonly ILogger<ProxyService> _logger;
     private readonly AgentOptions _options;
-    private readonly CertificateManager _certManager;
+    private readonly SslCertManager _certManager;
     private readonly DetectionEngine _detectionEngine;
     private readonly AlertService _alertService;
     private readonly RemoteLogService _logService;
@@ -21,7 +21,7 @@ public class ProxyService
     public ProxyService(
         ILogger<ProxyService> logger,
         IOptions<AgentOptions> options,
-        CertificateManager certManager,
+        SslCertManager certManager,
         DetectionEngine detectionEngine,
         AlertService alertService,
         RemoteLogService logService)
@@ -37,9 +37,13 @@ public class ProxyService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _proxyServer = new ProxyServer();
+
+        // Set our root CA on the proxy's certificate manager
         _proxyServer.CertificateManager.RootCertificate = _certManager.GetOrCreateRootCa();
-        _proxyServer.CertificateManager.CertificateValidationCallback += OnCertificateValidation;
-        _proxyServer.CertificateManager.CertificateSelectionCallback += OnCertificateSelection;
+
+        // Wire up validation callbacks on the proxy server
+        _proxyServer.ServerCertificateValidationCallback += OnCertificateValidation;
+        _proxyServer.ClientCertificateSelectionCallback += OnCertificateSelection;
 
         _proxyServer.BeforeRequest += OnBeforeRequest;
         _proxyServer.BeforeResponse += OnBeforeResponse;
@@ -64,6 +68,8 @@ public class ProxyService
         {
             _proxyServer.BeforeRequest -= OnBeforeRequest;
             _proxyServer.BeforeResponse -= OnBeforeResponse;
+            _proxyServer.ServerCertificateValidationCallback -= OnCertificateValidation;
+            _proxyServer.ClientCertificateSelectionCallback -= OnCertificateSelection;
             _proxyServer.Stop();
             _proxyServer.Dispose();
             _logger.LogInformation("Proxy stopped.");
@@ -88,7 +94,7 @@ public class ProxyService
         if ((method == "POST" || method == "PUT") && contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogWarning("Blocked image upload to {Url}", url);
-            await e.Ok("Upload gambar tidak diperbolehkan.", noCache: true);
+            e.Ok("Upload gambar tidak diperbolehkan.");
 
             var result = new Detection.Models.DetectionResult
             {
@@ -106,7 +112,7 @@ public class ProxyService
         }
 
         var ipResult = await _detectionEngine.CheckUnknownIpAsync(destinationHost);
-        if (ipResult.IsBlocked)
+        if (ipResult.IsBlocked || ipResult.IsFlagged)
         {
             _logger.LogWarning("Flagged unknown IP: {Host}", destinationHost);
             await _alertService.ShowAlertAsync($"Koneksi ke IP tidak dikenal: {destinationHost}", ipResult);
