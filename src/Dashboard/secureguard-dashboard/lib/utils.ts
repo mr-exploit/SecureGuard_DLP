@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: string | Date): string {
-  return new Date(date).toLocaleString("id-ID", {
+  return new Date(date).toLocaleString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",

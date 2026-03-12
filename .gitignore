@@ -16,6 +16,9 @@ artifacts/
 *.crt
 *.key
 
+# Sensitive configuration (use environment variables in production)
+appsettings.Development.json
+
 # .NET Core
 publish/
 *.publishsettings
