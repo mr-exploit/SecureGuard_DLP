@@ -1,0 +1,78 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: secureguard-postgres
+    environment:
+      POSTGRES_DB: secureguard
+      POSTGRES_USER: secureguard
+      POSTGRES_PASSWORD: SecureGuard@2024!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: secureguard-sqlserver
+    environment:
+      SA_PASSWORD: SecureGuard@2024!
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'SecureGuard@2024!' -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Server/SecureGuard.Server/Dockerfile
+    container_name: secureguard-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Database__Provider: PostgreSQL
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=secureguard;Username=secureguard;Password=SecureGuard@2024!"
+      Jwt__Key: SecureGuard-JWT-Secret-Key-2024-ChangeMeInProduction-MinLength32
+      Jwt__Issuer: SecureGuard.Server
+      Jwt__Audience: SecureGuard.Clients
+      AllowedOrigins__0: http://localhost:3000
+      AllowedOrigins__1: http://dashboard:3000
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: src/Dashboard/secureguard-dashboard
+      dockerfile: Dockerfile
+    container_name: secureguard-dashboard
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_SIGNALR_URL: http://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  sqlserver_data:
