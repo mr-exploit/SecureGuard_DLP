@@ -1,0 +1,90 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: secureguard-postgres
+    environment:
+      POSTGRES_DB: secureguard
+      POSTGRES_USER: secureguard
+      POSTGRES_PASSWORD: secureguard123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secureguard-net
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: secureguard-sqlserver
+    environment:
+      SA_PASSWORD: "SecureGuard@2024"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "SecureGuard@2024" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - secureguard-net
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Server/SecureGuard.Server/Dockerfile
+    container_name: secureguard-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - DatabaseProvider=postgresql
+      - ConnectionStrings__PostgreSQL=Host=postgres;Database=secureguard;Username=secureguard;Password=secureguard123
+      - ConnectionStrings__SqlServer=Server=sqlserver;Database=SecureGuard;User Id=sa;Password=SecureGuard@2024;TrustServerCertificate=True
+      - Jwt__Key=SecureGuard-DLP-JWT-Secret-Key-2024-ChangeThisInProduction!
+      - Jwt__Issuer=SecureGuard
+      - Jwt__ExpiryHours=24
+      - AllowedOrigins=http://localhost:3000
+      - AdminUser__Email=admin@secureguard.local
+      - AdminUser__Password=Admin@SecureGuard2024!
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - secureguard-net
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: src/Dashboard/secureguard-dashboard
+      dockerfile: Dockerfile
+    container_name: secureguard-dashboard
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NEXT_PUBLIC_SIGNALR_URL=http://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - secureguard-net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  sqlserver_data:
+
+networks:
+  secureguard-net:
+    driver: bridge
