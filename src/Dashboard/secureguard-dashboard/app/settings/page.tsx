@@ -51,7 +51,7 @@ export default function SettingsPage() {
             <CardHeader><CardTitle className="text-base">About SecureGuard</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p><strong>Version:</strong> 1.0.0</p>
-              <p><strong>Stack:</strong> .NET 8 Agent + ASP.NET Core 8 API + Next.js 14 Dashboard</p>
+              <p><strong>Stack:</strong> .NET 8 Agent + ASP.NET Core 8 API + Next.js 15 Dashboard</p>
               <p><strong>Database:</strong> PostgreSQL 16 / SQL Server 2022</p>
               <p><strong>Proxy:</strong> Titanium.Web.Proxy 3.2 on 127.0.0.1:8877</p>
               <p><strong>Realtime:</strong> SignalR</p>

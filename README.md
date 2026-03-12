@@ -1,7 +1,7 @@
 # SecureGuard DLP — Data Loss Prevention & Endpoint Monitoring System
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com)
-[![Next.js](https://img.shields.io/badge/Next.js-14-000000)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000)](https://nextjs.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)](https://www.docker.com)
 
@@ -42,7 +42,7 @@ Managed Endpoint
               │
               ▼
    ┌──────────────────────┐
-   │ Next.js 14 Dashboard │   Admin panel
+   │ Next.js 15 Dashboard │   Admin panel
    │ TailwindCSS          │   Styling
    │ shadcn/ui            │   Components
    │ Recharts             │   Charts
@@ -76,7 +76,7 @@ SecureGuard_DLP/
 │   │   ├── Hubs/                       # SignalR AlertHub
 │   │   └── Middleware/                 # JWT middleware
 │   ├── Shared/SecureGuard.Shared/      # Shared DTOs & constants
-│   └── Dashboard/secureguard-dashboard/ # Next.js 14 admin panel
+│   └── Dashboard/secureguard-dashboard/ # Next.js 15 admin panel
 │       ├── app/                        # App Router pages
 │       └── components/                 # React components
 ├── installer/
@@ -220,7 +220,7 @@ API Documentation (Swagger): http://localhost:5000/swagger
 | Primary DB | PostgreSQL 16 |
 | Secondary DB | SQL Server 2022 |
 | Realtime | SignalR |
-| Dashboard | Next.js 14 (App Router) |
+| Dashboard | Next.js 15 (App Router) |
 | UI Components | TailwindCSS + shadcn/ui |
 | Charts | Recharts |
 | Auth | JWT Bearer Tokens |
